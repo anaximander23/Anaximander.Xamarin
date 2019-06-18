@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>Anaximander.Xamarin.Android</id>
+        <version>$version$</version>
+        <description>An implementation of Anaximander.Xamarin for Android platforms</description>
+        <authors>anaximander</authors>
+    </metadata>
+</package>
