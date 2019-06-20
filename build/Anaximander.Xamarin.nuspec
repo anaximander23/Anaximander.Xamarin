@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Anaximander.Xamarin</id>
+    <version>$version$</version>
+    <description>A lightweight, extensible framework for building loosely-coupled apps in Xamarin.Forms</description>
+    <authors>anaximander</authors>
+    <license type="expression">MIT</license>
+    <dependencies>
+      <dependency id="Lamar" version="[3.0, 4.0)" />
+      <dependency id="MediatR" version="[7.0, 8.0)" />
+      <dependency id="Xamarin.Forms" version="[4.0, 5.0)" />
+    </dependencies>
+  </metadata>
+
+  <files>
+    <file src="..\src\Anaximander.Xamarin\bin\$configuration$\netstandard2.0\Anaximander.Xamarin.dll" target="lib\netstandard20" />
+    <file src="..\src\Anaximander.Xamarin\bin\$configuration$\netstandard2.0\Anaximander.Xamarin.pdb" target="lib\netstandard20" />
+  </files>
+</package>

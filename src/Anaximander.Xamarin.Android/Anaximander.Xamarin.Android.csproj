@@ -10,8 +10,9 @@
     <TemplateGuid>{9ef11e43-1701-4396-8835-8392d57abb70}</TemplateGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Anaximander.Mobile.Android</RootNamespace>
-    <AssemblyName>Anaximander.Mobile.Android</AssemblyName>
+    <RootNamespace>Anaximander.Xamarin.Android</RootNamespace>
+    <AssemblyName>Anaximander.Xamarin.Android</AssemblyName>
+    <NuspecFile>../../build/Anaximander.Xamarin.Android.nuspec</NuspecFile>
     <FileAlignment>512</FileAlignment>
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
@@ -54,9 +55,9 @@
     <None Include="Resources\AboutResources.txt" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Lamar" Version="3.0.*" />
-    <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="28.0.*" />
-    <PackageReference Include="Xamarin.Forms" Version="4.0.*" />
+    <PackageReference Include="Lamar" Version="3.0.3" />
+    <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="28.0.0.1" />
+    <PackageReference Include="Xamarin.Forms" Version="4.0.0.497661" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\values\strings.xml" />

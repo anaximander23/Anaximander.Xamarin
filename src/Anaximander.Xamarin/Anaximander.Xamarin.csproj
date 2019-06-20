@@ -1,16 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Authors>anaximander</Authors>
-    <Description>A lightweight, extensible framework for building loosely-coupled apps in Xamarin.Forms</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lamar" Version="3.0.*" />
-    <PackageReference Include="MediatR" Version="7.0.*" />
-    <PackageReference Include="Xamarin.Forms" Version="4.0.*" />
+    <PackageReference Include="Lamar" Version="3.0.3" />
+    <PackageReference Include="MediatR" Version="7.0.0" />
+    <PackageReference Include="Xamarin.Forms" Version="4.0.0.497661" />
   </ItemGroup>
-
 </Project>

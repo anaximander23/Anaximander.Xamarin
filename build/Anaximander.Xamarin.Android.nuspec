@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
-    <metadata>
-        <id>Anaximander.Xamarin.Android</id>
-        <version>$version$</version>
-        <description>An implementation of Anaximander.Xamarin for Android platforms</description>
-        <authors>anaximander</authors>
-    </metadata>
+  <metadata>
+    <id>Anaximander.Xamarin.Android</id>
+    <version>$version$</version>
+    <description>An implementation of Anaximander.Xamarin for Android platforms</description>
+    <authors>anaximander</authors>
+    <license type="expression">MIT</license>
+    <dependencies>
+      <dependency id="Anaximander.Xamarin" version="(, 1.0)" />
+      <dependency id="Xamarin.Forms" version="[4.0, 5.0)" />
+      <dependency id="Xamarin.Android.Support.v7.AppCompat" version="[28.0, 29.0)" />
+      <dependency id="Lamar" version="[3.0, 4.0)" />
+    </dependencies>
+  </metadata>
+
+  <files>
+    <file src="..\src\Anaximander.Xamarin.Android\bin\$configuration$\Anaximander.Xamarin.Android.dll" target="lib\monoandroid50" />
+    <file src="..\src\Anaximander.Xamarin.Android\bin\$configuration$\Anaximander.Xamarin.Android.pdb" target="lib\monoandroid50" />
+  </files>
 </package>
