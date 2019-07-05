@@ -2,9 +2,9 @@
 
 namespace Anaximander.Xamarin.Navigation
 {
-    public interface INavigationRoot
+    internal interface INavigationRoot
     {
-        INavigation Navigation { get; }
+        INavigation Navigation { get; set; }
         Page MainPage { get; set; }
     }
 }

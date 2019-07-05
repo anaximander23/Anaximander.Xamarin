@@ -7,7 +7,17 @@ using MediatR;
 
 namespace Anaximander.Xamarin
 {
-    public sealed class ApplicationCoreBuilder<TApp> where TApp : ApplicationCore
+    public static class ApplicationCoreBuilder
+    {
+        public static IApplicationCoreBuilder Create()
+            => new GenericApplicationCoreBuilder();
+
+        public static IApplicationCoreBuilder<TApp> Create<TApp>() where TApp : ApplicationCore
+            => new ApplicationCoreBuilder<TApp>();
+    }
+
+    internal class ApplicationCoreBuilder<TApp> : IApplicationCoreBuilder<TApp>
+        where TApp : ApplicationCore
     {
         public ApplicationCoreBuilder()
         {
@@ -18,14 +28,14 @@ namespace Anaximander.Xamarin
 
         private List<Action<ServiceRegistry>> _serviceRegistryActions;
 
-        public ApplicationCoreBuilder<TApp> UseStartup<TStartup>() where TStartup : AppStartup, new()
+        public IApplicationCoreBuilder<TApp> UseStartup<TStartup>() where TStartup : AppStartup, new()
         {
             _startup = new TStartup();
 
             return this;
         }
 
-        public ApplicationCoreBuilder<TApp> AddServiceRegistry<TRegistry>()
+        public IApplicationCoreBuilder<TApp> AddServiceRegistry<TRegistry>()
             where TRegistry : ServiceRegistry, new()
         {
             ConfigureServices(services => services.IncludeRegistry<TRegistry>());
@@ -33,7 +43,7 @@ namespace Anaximander.Xamarin
             return this;
         }
 
-        public ApplicationCoreBuilder<TApp> ConfigureServices(Action<ServiceRegistry> configureServices)
+        public IApplicationCoreBuilder<TApp> ConfigureServices(Action<ServiceRegistry> configureServices)
         {
             _serviceRegistryActions.Add(configureServices);
 
@@ -72,10 +82,12 @@ namespace Anaximander.Xamarin
                 });
             });
 
+            var appCore = container.GetInstance<ApplicationCore>();
+
             var navigationService = container.GetInstance<INavigationService>();
+
             _startup.InitialiseNavigation(navigationService);
 
-            var appCore = container.GetInstance<ApplicationCore>();
             return appCore;
         }
 
@@ -85,5 +97,9 @@ namespace Anaximander.Xamarin
             services.IncludeRegistry<PopupsRegistry>();
             services.IncludeRegistry<MediatorServiceRegistry>();
         }
+    }
+
+    internal sealed class GenericApplicationCoreBuilder : ApplicationCoreBuilder<ApplicationCore>, IApplicationCoreBuilder
+    {
     }
 }

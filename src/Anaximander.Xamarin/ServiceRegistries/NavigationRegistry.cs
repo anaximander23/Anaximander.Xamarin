@@ -7,7 +7,8 @@ namespace Anaximander.Xamarin.ServiceRegistries
     {
         public NavigationRegistry()
         {
-            For<INavigationRoot>().Use(context => context.GetInstance<ApplicationCore>()).Singleton();
+            For<INavigationRoot>().Use(c => c.GetInstance<ApplicationCore>());
+
             For<IPageFactory>().Use<LamarPageFactory>().Singleton();
             For<INavigationService>().Use<NavigationService>().Singleton();
 
