@@ -5,14 +5,20 @@ using Xamarin.Forms;
 
 namespace Anaximander.Xamarin
 {
-    public abstract class ApplicationCore : Application, INavigationRoot
+    public class ApplicationCore : Application, INavigationRoot
     {
         public ApplicationCore(IMediator mediator)
         {
             _mediator = mediator;
         }
 
-        public INavigation Navigation => MainPage.Navigation;
+        INavigation INavigationRoot.Navigation { get; set; }
+
+        Page INavigationRoot.MainPage
+        {
+            get => MainPage;
+            set => MainPage = value;
+        }
 
         private readonly IMediator _mediator;
 

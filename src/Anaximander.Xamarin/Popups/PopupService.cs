@@ -17,11 +17,6 @@ namespace Anaximander.Xamarin.Popups
         private readonly INavigationRoot _navigationRoot;
         private readonly IBusyIndicator _busyIndicator;
 
-        private Page GetRootPage()
-        {
-            return _navigationRoot.MainPage;
-        }
-
         public async Task ShowBusyIndicatorAsync()
         {
             await ShowBusyIndicatorAsync(null);
@@ -41,34 +36,39 @@ namespace Anaximander.Xamarin.Popups
 
         public async Task ShowAsync(Alert alert)
         {
-            await GetRootPage().DisplayAlert(alert.Title, alert.Message, alert.Cancel);
+            await GetCurrentPage().DisplayAlert(alert.Title, alert.Message, alert.Cancel);
         }
 
         public async Task<bool> ShowAsync(Dialog dialog)
         {
-            return await GetRootPage().DisplayAlert(dialog.Title, dialog.Message, dialog.Confirm, dialog.Cancel);
+            return await GetCurrentPage().DisplayAlert(dialog.Title, dialog.Message, dialog.Confirm, dialog.Cancel);
         }
 
         public async Task<string> ShowAsync(OptionsDialog dialog)
         {
-            return await GetRootPage().DisplayActionSheet(dialog.Title, dialog.Cancel, null, dialog.Options.ToArray());
+            return await GetCurrentPage().DisplayActionSheet(dialog.Title, dialog.Cancel, null, dialog.Options.ToArray());
         }
 
         public async Task<T> ShowAsync<T>(OptionsDialog<T> dialog)
         {
-            string selectedLabel = await GetRootPage().DisplayActionSheet(dialog.Title, dialog.Cancel.Key, null, dialog.Options.Select(o => o.Key).ToArray());
+            string selectedLabel = await GetCurrentPage().DisplayActionSheet(dialog.Title, dialog.Cancel.Key, null, dialog.Options.Select(o => o.Key).ToArray());
             return dialog.GetSelectedOption(selectedLabel);
         }
 
         public async Task<string> ShowAsync(DangerousOptionsDialog dialog)
         {
-            return await GetRootPage().DisplayActionSheet(dialog.Title, dialog.Cancel, dialog.DangerousOption, dialog.Options.ToArray());
+            return await GetCurrentPage().DisplayActionSheet(dialog.Title, dialog.Cancel, dialog.DangerousOption, dialog.Options.ToArray());
         }
 
         public async Task<T> ShowAsync<T>(DangerousOptionsDialog<T> dialog)
         {
-            string selectedLabel = await GetRootPage().DisplayActionSheet(dialog.Title, dialog.Cancel.Key, dialog.DangerousOption.Key, dialog.Options.Select(o => o.Key).ToArray());
+            string selectedLabel = await GetCurrentPage().DisplayActionSheet(dialog.Title, dialog.Cancel.Key, dialog.DangerousOption.Key, dialog.Options.Select(o => o.Key).ToArray());
             return dialog.GetSelectedOption(selectedLabel);
+        }
+
+        private Page GetCurrentPage()
+        {
+            return _navigationRoot.Navigation.NavigationStack.Last();
         }
     }
 }

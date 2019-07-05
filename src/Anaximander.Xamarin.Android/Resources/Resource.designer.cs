@@ -9,9 +9,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: global::Android.Runtime.ResourceDesignerAttribute("Anaximander.Mobile.Android.Resource", IsApplication=false)]
+[assembly: global::Android.Runtime.ResourceDesignerAttribute("Anaximander.Xamarin.Android.Resource", IsApplication=false)]
 
-namespace Anaximander.Mobile.Android
+namespace Anaximander.Xamarin.Android
 {
 	
 	

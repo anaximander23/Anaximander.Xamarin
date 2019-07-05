@@ -8,59 +8,145 @@ namespace Anaximander.Xamarin.Navigation
 {
     internal class NavigationService : INavigationService
     {
-        public NavigationService(INavigationRoot navigationRoot, IPageFactory pageFactory)
+        public NavigationService(IPageFactory pageFactory, INavigationRoot navigationRoot)
         {
-            _navigationRoot = navigationRoot;
             _pageFactory = pageFactory;
+            _navigationRoot = navigationRoot;
         }
 
-        private readonly INavigationRoot _navigationRoot;
+        public Page CurrentPage => GetCurrentPage();
+
         private readonly IPageFactory _pageFactory;
 
-        public void SetMainPage(Type pageType)
+        private INavigationRoot NavigationRoot
         {
-            Page mainPage = _pageFactory.CreatePage(pageType);
+            get => _navigationRoot ?? throw new InvalidOperationException("Cannot navigate; main page has not been set.");
+            set => _navigationRoot = value;
+        }
+
+        private INavigationRoot _navigationRoot;
+
+        private MasterDetailNavigationBehaviour _masterDetailNavigationBehaviour;
+
+        private Page GetCurrentPage()
+        {
+            return _navigationRoot.Navigation.NavigationStack.FirstOrDefault() ?? _navigationRoot.MainPage;
+        }
+
+        public async Task SetMainPageAsync(Type pageType)
+        {
+            Page mainPage = await _pageFactory.CreatePage(pageType);
             SetMainPage(mainPage);
         }
 
-        public void SetMainPage<T>() where T : Page
+        public async Task SetMainPageAsync<T>() where T : Page
         {
-            Page mainPage = _pageFactory.CreatePage<T>();
+            Page mainPage = await _pageFactory.CreatePage<T>();
             SetMainPage(mainPage);
+        }
+
+        public async Task SetMainPageAsync<T>(MasterDetailNavigationBehaviour navigationBehaviour) where T : MasterDetailPage
+        {
+            Page mainPage = await _pageFactory.CreatePage<T>();
+            SetMainPage(mainPage);
+
+            _masterDetailNavigationBehaviour = navigationBehaviour;
         }
 
         private void SetMainPage(Page mainPage)
         {
-            Page rootNavPage = new NavigationPage(mainPage);
-            NavigationPage.SetHasNavigationBar(mainPage, false);
+            switch (mainPage)
+            {
+                case NavigationPage navigationPage:
+                    _navigationRoot.MainPage = navigationPage;
+                    _navigationRoot.Navigation = navigationPage.Navigation;
 
-            _navigationRoot.MainPage = rootNavPage;
+                    return;
+
+                case MasterDetailPage masterDetailPage:
+                    if (masterDetailPage.Detail is NavigationPage)
+                    {
+                        _navigationRoot.Navigation = masterDetailPage.Detail.Navigation;
+                    }
+                    else
+                    {
+                        var detailNavPage = masterDetailPage.Detail is null ? new NavigationPage() : new NavigationPage(masterDetailPage.Detail);
+                        masterDetailPage.Detail = detailNavPage;
+                        _navigationRoot.Navigation = detailNavPage.Navigation;
+                    }
+
+                    _navigationRoot.MainPage = masterDetailPage;
+
+                    return;
+
+                default:
+                    Page rootNavPage = new NavigationPage(mainPage);
+
+                    _navigationRoot.MainPage = mainPage;
+                    _navigationRoot.Navigation = rootNavPage.Navigation;
+
+                    return;
+            }
         }
 
         public async Task NavigateToPageAsync<T>() where T : Page
         {
-            Page page = _pageFactory.CreatePage<T>();
-            await _navigationRoot.Navigation.PushAsync(page, true);
+            Page page = await _pageFactory.CreatePage<T>();
+
+            if (_masterDetailNavigationBehaviour == MasterDetailNavigationBehaviour.HideWhenNavigating
+                && NavigationRoot.MainPage is MasterDetailPage masterDetailPage)
+            {
+                masterDetailPage.IsPresented = false;
+            }
+
+            await NavigationRoot.Navigation.PushAsync(page, animated: true);
         }
 
-        public async Task NavigateBackAsync()
+        public async Task NavigateToPageAsync<T, TData>(TData data) where T : Page
         {
-            await _navigationRoot.Navigation.PopAsync();
+            Page page = await _pageFactory.CreatePageWithData<T, TData>(data);
+
+            if (_masterDetailNavigationBehaviour == MasterDetailNavigationBehaviour.HideWhenNavigating
+                && NavigationRoot.MainPage is MasterDetailPage masterDetailPage)
+            {
+                masterDetailPage.IsPresented = false;
+            }
+
+            await NavigationRoot.Navigation.PushAsync(page, animated: true);
+        }
+
+        public Task NavigateBackAsync()
+        {
+            if (_masterDetailNavigationBehaviour == MasterDetailNavigationBehaviour.HideWhenNavigating
+                && NavigationRoot.MainPage is MasterDetailPage masterDetailPage)
+            {
+                masterDetailPage.IsPresented = false;
+            }
+
+            return NavigationRoot.Navigation.PopAsync(animated: true);
         }
 
         public async Task NavigateBackToPageAsync<T>() where T : Page
         {
-            var currentPage = ((NavigationPage)_navigationRoot.MainPage).CurrentPage;
+            var couldNavigateBack = await TryNavigateBackToPageAsync<T>();
 
-            INavigation navController = _navigationRoot.Navigation;
+            if (!couldNavigateBack)
+            {
+                throw new InvalidOperationException("The target page type is not in the navigation stack");
+            }
+        }
+
+        public async Task<bool> TryNavigateBackToPageAsync<T>() where T : Page
+        {
+            INavigation navController = NavigationRoot.Navigation;
             IReadOnlyList<Page> navStack = navController.NavigationStack;
 
             if (!navStack.Any(p => p is T))
             {
-                throw new InvalidOperationException("The target page type is not in the navigation stack");
+                return false;
             }
 
-            if (!(currentPage is T))
+            if (!(CurrentPage is T))
             {
                 IEnumerable<Page> pagesToPop = navStack
                     .Reverse()
@@ -71,24 +157,68 @@ namespace Anaximander.Xamarin.Navigation
                 {
                     navController.RemovePage(page);
                 }
-                await navController.PopAsync();
+                await navController.PopAsync(animated: true);
+            }
+
+            if (_masterDetailNavigationBehaviour == MasterDetailNavigationBehaviour.HideWhenNavigating
+                && NavigationRoot.MainPage is MasterDetailPage masterDetailPage)
+            {
+                masterDetailPage.IsPresented = false;
+            }
+
+            return true;
+        }
+
+        public Task NavigateToMainPageAsync()
+        {
+            if (_masterDetailNavigationBehaviour == MasterDetailNavigationBehaviour.HideWhenNavigating
+                && NavigationRoot.MainPage is MasterDetailPage masterDetailPage)
+            {
+                masterDetailPage.IsPresented = false;
+            }
+
+            return NavigationRoot.Navigation.PopToRootAsync(animated: true);
+        }
+
+        public async Task ClearNavigationToPage<T>() where T : Page
+        {
+            var page = await _pageFactory.CreatePage<T>();
+            var rootPage = NavigationRoot.Navigation.NavigationStack.First();
+
+            await NavigationRoot.Navigation.PushAsync(page);
+            NavigationRoot.Navigation.RemovePage(rootPage);
+
+            if (_masterDetailNavigationBehaviour == MasterDetailNavigationBehaviour.HideWhenNavigating
+                && NavigationRoot.MainPage is MasterDetailPage masterDetailPage)
+            {
+                masterDetailPage.IsPresented = false;
             }
         }
 
-        public async Task NavigateToMainPageAsync()
+        public void ClearNavigationHistory()
         {
-            await _navigationRoot.Navigation.PopToRootAsync();
+            INavigation navController = NavigationRoot.Navigation;
+            IReadOnlyList<Page> navStack = navController.NavigationStack;
+
+            IEnumerable<Page> pagesToPop = navStack
+                .Reverse()
+                .Skip(1);
+
+            foreach (Page page in pagesToPop)
+            {
+                navController.RemovePage(page);
+            }
         }
 
         public async Task ShowModalAsync<T>() where T : Page
         {
-            Page page = _pageFactory.CreatePage<T>();
-            await _navigationRoot.Navigation.PushModalAsync(page);
+            Page page = await _pageFactory.CreatePage<T>();
+            await NavigationRoot.Navigation.PushModalAsync(page);
         }
 
-        public async Task RemoveModalAsync()
+        public Task RemoveModalAsync()
         {
-            await _navigationRoot.Navigation.PopModalAsync();
+            return NavigationRoot.Navigation.PopModalAsync();
         }
     }
 }
